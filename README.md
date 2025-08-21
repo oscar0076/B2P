@@ -17,6 +17,8 @@ pip install ninja
 ```
 ## Project architecture
 The project consists of a visual encoder, a projector layer, and a large language model (LLM). The visual encoder uses a pretrained CLIP-14-336px, the projector layer is composed of MLP layers used to adapt vision-tokens to language space suitable for input to a Large Language Model(Vicuna 1.5). 
-![Demo](images/architecture.png)
+
+<img src="images/architecture.png" alt="Demo" width="500"/>
+
 The model is trained in two stages (Pre-training and Fine-tuning)
 
