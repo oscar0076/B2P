@@ -20,5 +20,9 @@ The project consists of a visual encoder, a projector layer, and a large languag
 
 <img src="images/architecture.png" alt="Demo" width="500"/>
 
-The model is trained in two stages (Pre-training and Fine-tuning)
-
+The training process of our model consists of two stages: pre-training and fine-tuning.
+We started from the pretrained GeoChat model and fine-tuned it on a custom dataset designed for satellite image analysis. The goal of fine-tuning was to adapt the model for population estimation tasks, ensuring it can provide accurate results when analyzing different areas.
+In addition, we prepared the model to handle related tasks such as:
+  *Building counting from satellite images
+  *Image classification based on population count
+This fine-tuning process allows the model to better specialize in population-related applications while leveraging the strong multimodal foundation provided by GeoChat.
