@@ -644,23 +644,7 @@ with gr.Blocks() as demo:
     replace_flag = gr.State(value=0)
     image.upload(image_upload_trigger, [upload_flag, replace_flag, img_list], [upload_flag, replace_flag])
 
-    with gr.Row():
-        with gr.Column():
-            gr.Examples(examples=[
-                ["demo_images/train_2956_0001.png", "Where are the airplanes located and what is their type?", upload_flag, replace_flag,
-                 img_list],
-                ["demo_images/7292.JPG", "How many buildings are flooded?", upload_flag,
-                 replace_flag, img_list],
-            ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
-                outputs=[upload_flag, replace_flag])
-        with gr.Column():
-            gr.Examples(examples=[
-                ["demo_images/church_183.png", "Classify the image in the following classes: Church, Beach, Dense Residential, Storage Tanks.",
-                 upload_flag, replace_flag, img_list],
-                ["demo_images/04444.png", "[identify] what is this {<8><26><22><37>}", upload_flag,
-                 replace_flag, img_list],
-            ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
-                outputs=[upload_flag, replace_flag])
+
 
     dataset.click(
         gradio_taskselect,
