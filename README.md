@@ -28,3 +28,11 @@ In addition, we prepared the model to handle related tasks such as:
 This fine-tuning process allows the model to better specialize in population-related applications while leveraging the strong multimodal foundation provided by GeoChat.
 You can find our model in the following link: [B2P Model](https://huggingface.co/datasets/crns25/B2O)
 ## Evaluation
+### Q&A
+Below are some example Question & Answer (Q&A) results produced by our model:
+- Estimating the number of buildings in satellite imagery  
+- Classifying images according to population levels  
+- Identifying the type of area
+<img src="images/Q&A1.png" alt="Demo" width="500"/>
+<img src="images/Q&A2.png" alt="Demo" width="500"/>
+
