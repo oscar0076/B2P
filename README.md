@@ -34,5 +34,15 @@ Below are some example Question & Answer (Q&A) results produced by our model:
 - Classifying images according to population levels  
 - Identifying the type of area
 <img src="images/Q&A1.png" alt="Demo" width="500"/>
+<br>
+<br>
 <img src="images/Q&A2.png" alt="Demo" width="500"/>
+### Qualitative evaluation
+
+
+
+
+## Acknowledgement
+We gratefully acknowledge the contributions of LLaVA, Vicuna and  GeoChat, and thank them for making their work open source.
+
 
