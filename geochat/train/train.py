@@ -761,31 +761,17 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer,
 def train():
     global local_rank
 
-    # CRITICAL: Force GPU usage and check CUDA availability first
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is not available! This training script requires GPU.")
-    
-    # Set default device to GPU
-    torch.cuda.set_device(0)
-    device = torch.device("cuda:0")
-    print(f"✓ Using GPU: {torch.cuda.get_device_name(0)}")
-    print(f"✓ GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
-
     parser = transformers.HfArgumentParser(
         (ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
-    
-    # CRITICAL: Set device in training args
-    training_args.device = device
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
 
-    # CRITICAL FIX: Properly configure device mapping for quantization
     bnb_model_from_pretrained_args = {}
     if training_args.bits in [4, 8]:
         from transformers import BitsAndBytesConfig
         bnb_model_from_pretrained_args.update(dict(
-            device_map={"": 0},  # FORCE GPU 0 - this was the main issue
+            device_map={"": training_args.device},
             load_in_4bit=training_args.bits == 4,
             load_in_8bit=training_args.bits == 8,
             quantization_config=BitsAndBytesConfig(
@@ -798,14 +784,7 @@ def train():
                 bnb_4bit_quant_type=training_args.quant_type # {'fp4', 'nf4'}
             )
         ))
-    else:
-        # CRITICAL: Even for non-quantized models, ensure GPU placement
-        bnb_model_from_pretrained_args.update(dict(
-            device_map={"": 0},
-            torch_dtype=compute_dtype
-        ))
 
-    # Load model with proper GPU placement
     if model_args.vision_tower is not None:
         if 'mpt' in model_args.model_name_or_path:
             config = transformers.AutoConfig.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
@@ -828,15 +807,6 @@ def train():
             cache_dir=training_args.cache_dir,
             **bnb_model_from_pretrained_args
         )
-    
-    # CRITICAL: Verify model is on GPU
-    model_device = next(model.parameters()).device
-    print(f"✓ Model loaded on device: {model_device}")
-    if model_device.type != 'cuda':
-        print("WARNING: Model not on GPU, forcing move to GPU...")
-        model = model.to(device)
-        print(f"✓ Model moved to: {next(model.parameters()).device}")
-    
     model.config.use_cache = False
 
     if model_args.freeze_backbone:
@@ -872,9 +842,6 @@ def train():
                 model.to(torch.float16)
         rank0_print("Adding LoRA adapters...")
         model = get_peft_model(model, lora_config)
-        
-        # CRITICAL: Ensure LoRA model is still on GPU
-        print(f"✓ LoRA model device: {next(model.parameters()).device}")
 
     if 'mpt' in model_args.model_name_or_path:
         tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -915,10 +882,7 @@ def train():
         )
         
         vision_tower = model.get_vision_tower()
-        # CRITICAL: Ensure vision tower is on GPU with correct dtype
-        vision_dtype = torch.bfloat16 if training_args.bf16 else torch.float16
-        vision_tower.to(dtype=vision_dtype, device=device)
-        print(f"✓ Vision tower on device: {device} with dtype: {vision_dtype}")
+        vision_tower.to(dtype=torch.bfloat16 if training_args.bf16 else torch.float16, device=training_args.device)
 
         data_args.image_processor = vision_tower.image_processor
         data_args.is_multimodal = True
@@ -938,9 +902,7 @@ def train():
                 p.requires_grad = False
 
         if training_args.bits in [4, 8]:
-            # CRITICAL: Ensure mm_projector is on GPU
-            model.get_model().mm_projector.to(dtype=compute_dtype, device=device)
-            print(f"✓ MM projector on device: {device}")
+            model.get_model().mm_projector.to(dtype=compute_dtype, device=training_args.device)
 
         model.config.mm_use_im_start_end = data_args.mm_use_im_start_end = model_args.mm_use_im_start_end
         training_args.use_im_start_end = model_args.mm_use_im_start_end
@@ -959,10 +921,6 @@ def train():
                 if hasattr(module, 'weight'):
                     if training_args.bf16 and module.weight.dtype == torch.float32:
                         module = module.to(torch.bfloat16)
-
-    # Final verification
-    print(f"✓ FINAL CHECK - Model device: {next(model.parameters()).device}")
-    print(f"✓ GPU memory allocated: {torch.cuda.memory_allocated(0) / 1024**3:.2f} GB")
 
     data_module = make_supervised_data_module(tokenizer=tokenizer,
                                               data_args=data_args)

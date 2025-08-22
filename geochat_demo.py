@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument("--model-path", type=str, default="facebook/opt-350m")
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--gpu-id", type=str,default=0)
-    parser.add_argument("--device", type=str, default="cpu")
+    parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--conv-mode", type=str, default=None)
     parser.add_argument("--max-new-tokens", type=int, default=300)
     parser.add_argument("--load-8bit", action="store_true")
@@ -51,11 +51,8 @@ args = parse_args()
 
 model_name = get_model_name_from_path(args.model_path)
 tokenizer, model, image_processor, context_len = load_pretrained_model(args.model_path, args.model_base, model_name, args.load_8bit, args.load_4bit, device=args.device)
-print(f"image_processor: {image_processor}", flush=True)
-print(f"image_mean: {getattr(image_processor, 'image_mean', None)}", flush=True)
 
-# device = 'cuda:{}'.format(args.gpu_id)
-device='cpu'
+device = 'cuda:{}'.format(args.gpu_id)
 
 # model_config = cfg.model_cfg
 # model_config.device_8bit = args.gpu_id
@@ -592,7 +589,8 @@ chat = Chat(model, image_processor,tokenizer, device=device)
 
 title = """<h1 align="center">GeoChat Demo</h1>"""
 description = 'Welcome to Our GeoChat Chatbot Demo!'
-
+article = """<div style="display: flex;"><p style="display: inline-block;"><a href='https://mbzuai-oryx.github.io/GeoChat'><img src='https://img.shields.io/badge/Project-Page-Green'></a></p><p style="display: inline-block;"><a href='https://arxiv.org/abs/2311.15826'><img src='https://img.shields.io/badge/Paper-PDF-red'></a></p><p style="display: inline-block;"><a href='https://github.com/mbzuai-oryx/GeoChat/tree/main'><img src='https://img.shields.io/badge/GitHub-Repo-blue'></a></p><p style="display: inline-block;"><a href='https://youtu.be/KOKtkkKpNDk?feature=shared'><img src='https://img.shields.io/badge/YouTube-Video-red'></a></p></div>"""
+# article = """<p><a href='https://minigpt-v2.github.io'><img src='https://img.shields.io/badge/Project-Page-Green'></a></p>"""
 
 introduction = '''
 1. Identify: Draw the bounding box on the uploaded image window and CLICK **Send** to generate the bounding box. (CLICK "clear" button before re-drawing next time).
@@ -646,7 +644,24 @@ with gr.Blocks() as demo:
     replace_flag = gr.State(value=0)
     image.upload(image_upload_trigger, [upload_flag, replace_flag, img_list], [upload_flag, replace_flag])
 
-    
+    with gr.Row():
+        with gr.Column():
+            gr.Examples(examples=[
+                ["demo_images/train_2956_0001.png", "Where are the airplanes located and what is their type?", upload_flag, replace_flag,
+                 img_list],
+                ["demo_images/7292.JPG", "How many buildings are flooded?", upload_flag,
+                 replace_flag, img_list],
+            ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
+                outputs=[upload_flag, replace_flag])
+        with gr.Column():
+            gr.Examples(examples=[
+                ["demo_images/church_183.png", "Classify the image in the following classes: Church, Beach, Dense Residential, Storage Tanks.",
+                 upload_flag, replace_flag, img_list],
+                ["demo_images/04444.png", "[identify] what is this {<8><26><22><37>}", upload_flag,
+                 replace_flag, img_list],
+            ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
+                outputs=[upload_flag, replace_flag])
+
     dataset.click(
         gradio_taskselect,
         inputs=[dataset],

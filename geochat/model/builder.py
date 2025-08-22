@@ -21,9 +21,9 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BitsAn
 import torch
 from geochat.model import *
 from geochat.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
-from transformers import CLIPImageProcessor
 
-def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cpu"):
+
+def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cuda"):
     kwargs = {"device_map": device_map}
 
     if load_8bit:
@@ -138,16 +138,8 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         vision_tower = model.get_vision_tower()
         if not vision_tower.is_loaded:
             vision_tower.load_model()
-        #vision_tower.to(device=device, dtype=torch.float16)
-        dtype = torch.float16 if device != "cpu" else torch.float32
-        vision_tower.to(device=device, dtype=dtype)
-        
+        vision_tower.to(device=device, dtype=torch.float16)
         image_processor = vision_tower.image_processor
-        if image_processor is None:
-            print("Warning: vision_tower.image_processor is None. Using CLIPImageProcessor fallback.")
-            from transformers import CLIPImageProcessor
-            image_processor = CLIPImageProcessor.from_pretrained("openai/clip-vit-large-patch14")
- 
 
     if hasattr(model.config, "max_sequence_length"):
         context_len = model.config.max_sequence_length
