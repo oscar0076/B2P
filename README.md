@@ -7,7 +7,7 @@ A Large Vision-Language Model for Urban Density Estimation
 # Clone the repository
 git clone https://github.com/oscar0076/B2P.git
 # Change directory
-B2P
+cd B2P
 #
 conda create -n b2p python=3.10 -y
 conda activate b2p
