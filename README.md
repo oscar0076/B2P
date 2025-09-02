@@ -37,7 +37,9 @@ Below are some example Question & Answer (Q&A) results produced by our model:
 <br>
 <br>
 <img src="images/Q&A2.png" alt="Demo" width="500"/>
+
 ### Qualitative evaluation
+
 We further present qualitative results to highlight the ability of the model to generalize across different urban settings and question types.  
 <img src="images/rural_urban CM.png" alt="Q 1" width="500"/>  
 <br><br>  
