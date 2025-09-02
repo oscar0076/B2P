@@ -50,6 +50,7 @@ We further present qualitative results to highlight the ability of the model to 
 <img src="images/Q4f1.png" alt="Q4F1" width="500"/>  
 <br><br>  
 <img src="images/Q4f2.png" alt="Q4f2" width="500"/>
+
 ## Acknowledgement
 We gratefully acknowledge the contributions of LLaVA, Vicuna and  GeoChat, and thank them for making their work open source.
 
