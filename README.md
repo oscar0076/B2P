@@ -38,10 +38,18 @@ Below are some example Question & Answer (Q&A) results produced by our model:
 <br>
 <img src="images/Q&A2.png" alt="Demo" width="500"/>
 ### Qualitative evaluation
-
-
-
-
+We further present qualitative results to highlight the ability of the model to generalize across different urban settings and question types.  
+<img src="images/rural_urban CM.png" alt="Q 1" width="500"/>  
+<br><br>  
+<img src="images/Q2.png" alt="Q 2" width="500"/>
+<br><br>  
+<img src="images/Q2f2.png" alt="Q2F2" width="500"/>  
+<br><br>  
+<img src="images/Q3.png" alt="Q3" width="500"/>
+<br><br>  
+<img src="images/Q4f1.png" alt="Q4F1" width="500"/>  
+<br><br>  
+<img src="images/Q4f2.png" alt="Q4f2" width="500"/>
 ## Acknowledgement
 We gratefully acknowledge the contributions of LLaVA, Vicuna and  GeoChat, and thank them for making their work open source.
 
